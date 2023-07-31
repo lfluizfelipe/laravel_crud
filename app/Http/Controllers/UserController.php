@@ -4,6 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
+use Mockery\Exception;
 
 class UserController extends Controller
 {
@@ -35,19 +38,38 @@ class UserController extends Controller
      */
     public function store(Request $request)
     {
-        $created = $this->user->create([
-            'name' => $request->input('name'),
-            'email' => $request->input('email'),
-            'password' => $request->input('password'),
-            'remember_token' => $request->input('remember_token')
-
+        $request->validate([
+            'name' => 'required',
+            'email' => 'required',
+            'password' => 'required',
+            'remember_token' => 'nullable',
+            'photo' => 'image|mimes:jpeg,png,jpg,gif|max:2048'
         ]);
+
+        if ($request->hasFile('photo') && $request->file('photo')->isValid()) {
+            $image = $request->file('photo');
+            try {
+            $path = $request->file('photo')->storeAs('photos', $request->file('photo')->getClientOriginalName());
+
+
+                $created = $this->user->create([
+                    'name' => $request->input('name'),
+                    'email' => $request->input('email'),
+                    'password' => $request->input('password'),
+                    'remember_token' => $request->input('remember_token'),
+                    'photo' => $path
+                ]);
+            } catch (\Exception $e) {
+                dd($e->getMessage());
+            }
+        }
 
         if($created) {
             return redirect()->back()->with('message', 'Created Successfully');
         }
 
         return redirect()->back()->with('message', 'Error');
+
     }
 
     /**

@@ -8,7 +8,7 @@
         @csrf
         <input type="hidden" name="_method" value="DELETE">
         <button type="submit">Delete</button>
-        <button type="" ><a href="{{ route('users.index') }}">Voltar</a></button>
+        <button type="" ><a href="{{ route('users.index') }}">Back</a></button>
     </form>
 
 @endsection
